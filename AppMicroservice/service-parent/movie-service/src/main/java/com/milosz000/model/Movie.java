@@ -27,7 +27,7 @@ public class Movie {
 
     private String description;
 
-    //TODO: create Actor entity and add relations
+    // TODO: create Actor entity and add relations
 //    private Set<String> stars;
     private Integer release;
 
