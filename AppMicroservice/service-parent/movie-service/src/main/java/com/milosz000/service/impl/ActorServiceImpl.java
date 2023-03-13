@@ -23,16 +23,16 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public List<ActorDto> getAllActors() {
-        List<Actor> actors = actorRepository.findAll();
-
-        return actors.stream().map(this::mapActorToDto).toList();
+    public List<Actor> getAllActors() {
+        return actorRepository.findAll();
+        
     }
 
     private Actor mapDtoToActor(ActorDto actorDto) {
         return Actor.builder()
                 .firstname(actorDto.getFirstname())
                 .lastname(actorDto.getLastname())
+                .movies(actorDto.getMovies())
                 .build();
     }
 
@@ -41,6 +41,7 @@ public class ActorServiceImpl implements ActorService {
         return ActorDto.builder()
                 .firstname(actor.getFirstname())
                 .lastname(actor.getLastname())
+                .movies(actor.getMovies())
                 .build();
     }
 }

@@ -20,15 +20,23 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String director;
+
+    @ManyToOne
+    @JoinColumn(name = "director_id")
+    private Director director;
 
     @Enumerated(value = EnumType.STRING)
     private MovieGenre genre;
 
     private String description;
 
-    // TODO: create Actor entity and add relations
-//    private Set<String> stars;
+
+    @ManyToMany
+    @JoinTable(name = "actorsMovies",
+    joinColumns = @JoinColumn(name = "movie_id"),
+    inverseJoinColumns = @JoinColumn(name = "actor_id"))
+    private Set<Actor> stars;
+
     private Integer release;
 
 }

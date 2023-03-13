@@ -2,6 +2,7 @@ package com.milosz000.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,12 @@ public class Director {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    @Size(min = 3)
     private String firstname;
+
+    @Column(nullable = false)
+    @Size(min = 3)
     private String lastname;
 
     @OneToMany(mappedBy = "director")

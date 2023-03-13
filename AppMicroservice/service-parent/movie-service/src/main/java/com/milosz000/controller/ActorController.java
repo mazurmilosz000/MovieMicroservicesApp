@@ -1,6 +1,7 @@
 package com.milosz000.controller;
 
 import com.milosz000.dto.ActorDto;
+import com.milosz000.model.Actor;
 import com.milosz000.service.ActorService;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +26,10 @@ public class ActorController {
     }
 
     @GetMapping
-    public List<ActorDto> getAllActors() {
+    public List<Actor> getAllActors() {
         return actorService.getAllActors();
     }
+
+
 
 }

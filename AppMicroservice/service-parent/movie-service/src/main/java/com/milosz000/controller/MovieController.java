@@ -1,6 +1,7 @@
 package com.milosz000.controller;
 
 import com.milosz000.dto.MovieDto;
+import com.milosz000.model.Movie;
 import com.milosz000.service.MovieService;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class MovieController {
     }
 
     @GetMapping
-    public List<MovieDto> getAllMovies() {
+    public List<Movie> getAllMovies() {
 
         return movieService.getAllMovies();
     }
