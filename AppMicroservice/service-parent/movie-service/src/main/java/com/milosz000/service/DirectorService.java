@@ -13,4 +13,6 @@ public interface DirectorService {
     String deleteDirector(Long id);
 
     Director getDirector(Long id);
+
+    String addMovieToDirector(Long directorId, Long movieId);
 }

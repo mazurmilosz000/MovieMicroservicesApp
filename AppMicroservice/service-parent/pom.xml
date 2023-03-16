@@ -11,6 +11,7 @@
     <modules>
         <module>movie-service</module>
         <module>ms-service</module>
+        <module>auth-service</module>
     </modules>
 
 
@@ -22,6 +23,9 @@
         <spring.boot.dependencies.version>3.0.4</spring.boot.dependencies.version>
         <spring.boot.starter.web.version>3.0.4</spring.boot.starter.web.version>
         <spring.boot.starter.data.jpa.version>3.0.4</spring.boot.starter.data.jpa.version>
+        <spring.boot.starter.security.version>3.0.4</spring.boot.starter.security.version>
+        <spring.security.test.version>6.0.2</spring.security.test.version>
+        <psql.version>42.5.4</psql.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <ms.version>1.0-SNAPSHOT</ms.version>
     </properties>

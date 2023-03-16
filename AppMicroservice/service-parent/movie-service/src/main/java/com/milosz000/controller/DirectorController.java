@@ -5,11 +5,13 @@ import com.milosz000.exception.ApiRequestException;
 import com.milosz000.model.Director;
 import com.milosz000.service.DirectorService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/director")
 public class DirectorController {
@@ -48,5 +50,17 @@ public class DirectorController {
             throw  new ApiRequestException("Director with that id does not exist!");
         }
     }
+
+    @PostMapping("{directorId}/addMovie/{movieId}")
+    public String addMovieToDirector(
+            @PathVariable("directorId") Long directorId,
+            @PathVariable("movieId") Long movieId) {
+
+        log.info("directorId: " + directorId);
+        log.info("movieId: " + movieId);
+
+        return directorService.addMovieToDirector(directorId, movieId);
+    }
+
 
 }
