@@ -1,4 +1,4 @@
-package com.milosz000.model.config;
+package com.milosz000.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtTokenService {
+public class JwtService {
 
 
     @Value(value = "${SECRET_KEY}")
