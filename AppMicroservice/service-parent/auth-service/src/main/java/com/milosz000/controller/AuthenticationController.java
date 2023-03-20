@@ -20,7 +20,7 @@ public class AuthenticationController {
 //    }
 //
 //    @PostMapping("/register")
-//    public ResponseEntity<AuthenticationResponseDto> register(@RequestBody RegisterRequestDto registerRequestDto){
+//    public ResponseEntity<AuthenticationResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
 //
 //        userService.register(registerRequestDto);
 //
