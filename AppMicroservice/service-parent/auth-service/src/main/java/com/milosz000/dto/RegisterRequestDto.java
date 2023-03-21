@@ -1,5 +1,6 @@
 package com.milosz000.dto;
 
+import com.milosz000.validation.ValidConfirmedField;
 import com.milosz000.validation.ValidPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ValidConfirmedField(originalField = "password", confirmationField = "passwordConfirmation")
 public class RegisterRequestDto {
 
     @NotBlank
@@ -32,6 +34,6 @@ public class RegisterRequestDto {
     private String password;
 
     @NotBlank
-    private String passwordRepeat;
+    private String passwordConfirmation;
 
 }

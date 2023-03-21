@@ -27,9 +27,9 @@ public class UserServiceImpl implements UserService {
 
         if(optionalEmail.isPresent()) return "email exists";
 
-        if(!validatePassword(registerRequestDto.getPassword(), registerRequestDto.getPasswordRepeat())) {
-            return "different password";
-        }
+//        if(!validatePassword(registerRequestDto.getPassword(), registerRequestDto.getPasswordConfirmation())) {
+//            return "different password";
+//        }
 
         // TODO: make password validator/create password regex
         User user = User.builder()
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         return "user added";
     }
 
-    private boolean validatePassword(String password, String passwordRepeated) {
-        return password.equals(passwordRepeated);
-    }
+//    private boolean validatePassword(String password, String passwordRepeated) {
+//        return password.equals(passwordRepeated);
+//    }
 }

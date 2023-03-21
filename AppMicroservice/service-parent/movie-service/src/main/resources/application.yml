@@ -1,10 +1,13 @@
+server:
+  port: 8082
+
 spring:
   application:
     name: movie-service
 
     #TODO: create database
   datasource:
-    url: jdbc:postgresql://localhost:5555/${DB_NAME}
+    url: jdbc:postgresql://localhost:1501/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
