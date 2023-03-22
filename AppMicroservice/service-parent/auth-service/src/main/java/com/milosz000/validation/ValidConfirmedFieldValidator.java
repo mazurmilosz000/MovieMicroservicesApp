@@ -25,7 +25,7 @@ public class ValidConfirmedFieldValidator implements ConstraintValidator<ValidCo
         Object fieldValue = new BeanWrapperImpl(value).getPropertyValue(originalField);
         Object fieldMatchValue = new BeanWrapperImpl(value).getPropertyValue(confirmationField);
 
-        boolean isValid = fieldValue != null && fieldValue.equals(confirmationField);
+        boolean isValid = fieldValue != null && fieldValue.equals(fieldMatchValue);
 
         if (!isValid) {
             context.disableDefaultConstraintViolation();

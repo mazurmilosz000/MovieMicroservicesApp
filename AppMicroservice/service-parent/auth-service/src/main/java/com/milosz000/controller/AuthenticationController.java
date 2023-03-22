@@ -24,8 +24,9 @@ public class AuthenticationController {
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
 
-        userService.register(registerRequestDto);
+        // return status code 200 and token
+        return ResponseEntity.ok(userService.register(registerRequestDto));
 
-        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 }

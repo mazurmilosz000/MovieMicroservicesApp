@@ -79,7 +79,7 @@ public class JwtService {
         return expirationDateFromToken.before(new Date(System.currentTimeMillis()));
     }
 
-    private String getUsernameFromToken(String token){
+    public String getUsernameFromToken(String token){
         return getClaimFromToken(token, Claims::getSubject);
     }
 }

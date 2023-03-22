@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// TODO: create validators exception handler
 @Data
 @Builder
 @AllArgsConstructor

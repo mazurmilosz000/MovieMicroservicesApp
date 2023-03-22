@@ -1,6 +1,9 @@
 package com.milosz000.service.impl;
 
+import com.milosz000.config.JwtService;
+import com.milosz000.dto.AuthenticationResponseDto;
 import com.milosz000.dto.RegisterRequestDto;
+import com.milosz000.exception.ApiRequestException;
 import com.milosz000.model.User;
 import com.milosz000.model.enums.Role;
 import com.milosz000.repository.UserRepository;
@@ -17,21 +20,18 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
-    public String register(RegisterRequestDto registerRequestDto) {
+    public AuthenticationResponseDto register(RegisterRequestDto registerRequestDto) {
         Optional<User> optionalEmail = userRepository.findByEmail(registerRequestDto.getEmail());
         Optional<User> optionalUsername = userRepository.findByUsername(registerRequestDto.getUsername());
 
-        if(optionalUsername.isPresent()) return "username exists";
+        if(optionalUsername.isPresent()) throw new ApiRequestException("Username already in use");
 
-        if(optionalEmail.isPresent()) return "email exists";
+        if(optionalEmail.isPresent()) throw new ApiRequestException("Email already in use");
 
-//        if(!validatePassword(registerRequestDto.getPassword(), registerRequestDto.getPasswordConfirmation())) {
-//            return "different password";
-//        }
 
-        // TODO: make password validator/create password regex
         User user = User.builder()
                 .username(registerRequestDto.getUsername())
                 .email(registerRequestDto.getEmail())
@@ -44,10 +44,11 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        return "user added";
-    }
+        String token = jwtService.generateToken(user);
 
-//    private boolean validatePassword(String password, String passwordRepeated) {
-//        return password.equals(passwordRepeated);
-//    }
+        return AuthenticationResponseDto.builder().token(token).build();
+
+
+
+    }
 }
