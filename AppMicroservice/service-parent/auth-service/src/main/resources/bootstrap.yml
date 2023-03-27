@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    config:
+      username: admin
+      password: secret
+  application:
+    name: auth_service
+  config:
+    import: optional:http://localhost:8888/
+
+
+
