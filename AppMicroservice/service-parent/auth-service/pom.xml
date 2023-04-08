@@ -24,6 +24,11 @@
             <version>${ms.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.milosz000</groupId>
+            <artifactId>notification-service</artifactId>
+            <version>${notification.service.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
             <version>${spring.cloud.starter.netflix.eureka.client.version}</version>
