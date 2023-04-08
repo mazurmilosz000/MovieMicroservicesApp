@@ -15,6 +15,7 @@
         <module>cs-service</module>
         <module>eureka-server</module>
         <module>api-gateway</module>
+        <module>notification-service</module>
     </modules>
 
 
@@ -33,6 +34,7 @@
         <psql.version>42.5.4</psql.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <ms.version>1.0-SNAPSHOT</ms.version>
+        <notification.service.version>1.0-SNAPSHOT</notification.service.version>
     </properties>
 
     <dependencyManagement>

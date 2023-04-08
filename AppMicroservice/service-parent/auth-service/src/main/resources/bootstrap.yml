@@ -11,5 +11,7 @@ spring:
   config:
     import: optional:http://localhost:8888/
 
+CONFIRMATION_TOKEN_EXP_TIME: 15
+
 
 

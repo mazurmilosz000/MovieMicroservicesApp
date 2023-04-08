@@ -1,23 +1,32 @@
 package com.milosz000.service.impl;
 
+import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
 import com.milosz000.config.JwtService;
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
 import com.milosz000.dto.RegisterRequestDto;
 import com.milosz000.exception.ApiRequestException;
+import com.milosz000.model.ConfirmationToken;
 import com.milosz000.model.User;
 import com.milosz000.model.enums.Role;
+import com.milosz000.repository.ConfirmationTokenRepository;
 import com.milosz000.repository.UserRepository;
+import com.milosz000.service.ConfirmationTokenService;
+import com.milosz000.service.EmailService;
 import com.milosz000.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
-
+import java.util.UUID;
 
 
 @Service
@@ -28,7 +37,16 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private final ConfirmationTokenService confirmationTokenService;
+
     private final AuthenticationManager authenticationManager;
+
+    private final ConfirmationTokenRepository confirmationTokenRepository;
+
+    private final EmailService emailService;
+
+    @Value(value = "${CONFIRMATION_TOKEN_EXP_TIME}")
+    private int CONFIRMATION_TOKEN_EXP_TIME;
 
     @Override
     public AuthenticationResponseDto register(RegisterRequestDto registerRequestDto) {
@@ -52,10 +70,27 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
+//        String token = jwtService.generateToken(user);
+//
+//        return AuthenticationResponseDto.builder().token(token).build();
 
-        return AuthenticationResponseDto.builder().token(token).build();
+        // generate authentication token
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken = new ConfirmationToken(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(CONFIRMATION_TOKEN_EXP_TIME),
+                user
+        );
 
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
+
+        // TODO: send confirmation email
+        emailService.sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
+
+        return AuthenticationResponseDto.builder()
+                .token(token)
+                .build();
 
 
     }
@@ -80,5 +115,42 @@ public class UserServiceImpl implements UserService {
         return AuthenticationResponseDto.builder()
                 .token(token)
                 .build();
+    }
+
+    @Override
+    public void enableUserAccount(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UsernameNotFoundException("Cannot find user with that email"));
+
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public String confirmAccount(String token) {
+        ConfirmationToken confirmationToken = confirmationTokenRepository
+                .findByToken(token)
+                .orElseThrow(() -> new IllegalStateException("token not found"));
+
+        // check if token is not already confirmed
+        if (confirmationToken.getConfirmedAt() != null) {
+            throw new IllegalStateException("email already confirmed");
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // check if token is not expired
+        if (confirmationToken.getExpiresAt().isBefore(currentTime)) {
+            throw new IllegalStateException("token is expired");
+        }
+
+        confirmationToken.setConfirmedAt(currentTime);
+
+        confirmationTokenRepository.save(confirmationToken);
+        enableUserAccount(confirmationToken.getUser().getEmail());
+
+        return "confirmed";
+
     }
 }
