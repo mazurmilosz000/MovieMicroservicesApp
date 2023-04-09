@@ -1,22 +1,23 @@
 package com.milosz000.service.impl;
 
-import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
+import com.google.common.hash.Hashing;
 import com.milosz000.config.JwtService;
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
 import com.milosz000.dto.RegisterRequestDto;
 import com.milosz000.exception.ApiRequestException;
 import com.milosz000.model.ConfirmationToken;
+import com.milosz000.model.PasswordResetToken;
 import com.milosz000.model.User;
 import com.milosz000.model.enums.Role;
 import com.milosz000.repository.ConfirmationTokenRepository;
+import com.milosz000.repository.ResetPasswordTokenRepository;
 import com.milosz000.repository.UserRepository;
 import com.milosz000.service.ConfirmationTokenService;
 import com.milosz000.service.EmailService;
 import com.milosz000.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,10 +45,12 @@ public class UserServiceImpl implements UserService {
 
     private final ConfirmationTokenRepository confirmationTokenRepository;
 
+    private final ResetPasswordTokenRepository resetPasswordTokenRepository;
+
     private final EmailService emailService;
 
-    @Value(value = "${CONFIRMATION_TOKEN_EXP_TIME}")
-    private int CONFIRMATION_TOKEN_EXP_TIME;
+    @Value(value = "${TOKEN_EXP_TIME}")
+    private int TOKEN_EXP_TIME;
 
     @Override
     public AuthenticationResponseDto register(RegisterRequestDto registerRequestDto) {
@@ -79,13 +83,13 @@ public class UserServiceImpl implements UserService {
         ConfirmationToken confirmationToken = new ConfirmationToken(
                 token,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(CONFIRMATION_TOKEN_EXP_TIME),
+                LocalDateTime.now().plusMinutes(TOKEN_EXP_TIME),
                 user
         );
 
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
-        // TODO: send confirmation email
+        // send confirmation email
         emailService.sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
 
         return AuthenticationResponseDto.builder()
@@ -152,5 +156,30 @@ public class UserServiceImpl implements UserService {
 
         return "confirmed";
 
+    }
+
+    @Override
+    public void sendResetPasswordLink(String email) {
+        // TODO: when I am typing wrong email, I am receiving 403 instead of 200, (need to fix)
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with that email"));
+
+        // create reset password token
+        String token = UUID.randomUUID().toString();
+        String hashedToken = Hashing.sha256().hashString(token, StandardCharsets.UTF_8).toString();
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        PasswordResetToken passwordResetToken = new PasswordResetToken(
+                hashedToken,
+                currentTime,
+                currentTime.plusMinutes(TOKEN_EXP_TIME),
+                user
+        );
+
+        // send email with reset password link
+        emailService.sendResetPasswordEmail(user.getEmail(), user.getFirstName(), token);
+
+        resetPasswordTokenRepository.save(passwordResetToken);
     }
 }

@@ -7,23 +7,22 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
-@Table(name = "confirmation_token")
-public class ConfirmationToken extends GenericToken{
+@Table(name = "password_reset_token")
+public class PasswordResetToken extends GenericToken{
 
-    private LocalDateTime confirmedAt;
-
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
-    private User user;
+    User user;
 
-    public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, User user) {
+    public PasswordResetToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, User user) {
         this.token = token;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.user = user;
     }
+
 }

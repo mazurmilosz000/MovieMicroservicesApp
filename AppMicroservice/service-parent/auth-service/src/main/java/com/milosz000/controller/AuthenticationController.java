@@ -2,6 +2,7 @@ package com.milosz000.controller;
 
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
+import com.milosz000.dto.EmailDto;
 import com.milosz000.dto.RegisterRequestDto;
 import com.milosz000.service.ConfirmationTokenService;
 import com.milosz000.service.UserService;
@@ -36,6 +37,18 @@ public class AuthenticationController {
             return "account confirmed";
         }
         return "not confirmed";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody EmailDto emailRequest) {
+
+        userService.sendResetPasswordLink(emailRequest.getEmail());
+
+        /*
+            Even if the email does not exist, It will show a message that says the email has been sent successfully.
+            That way I don't give attackers any indication that they should try a different email address.
+         */
+        return "email has been sent successfully";
     }
 
 }
