@@ -2,6 +2,7 @@ package com.milosz000.service;
 
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
+import com.milosz000.dto.EmailDto;
 import com.milosz000.dto.RegisterRequestDto;
 
 public interface UserService {
@@ -12,4 +13,6 @@ public interface UserService {
     void enableUserAccount(String email);
 
     String confirmAccount(String token);
+
+    void sendResetPasswordLink(String email);
 }
