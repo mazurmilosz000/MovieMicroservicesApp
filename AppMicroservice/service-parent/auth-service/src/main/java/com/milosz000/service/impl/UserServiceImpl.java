@@ -4,8 +4,11 @@ import com.google.common.hash.Hashing;
 import com.milosz000.config.JwtService;
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
+import com.milosz000.dto.NewPasswordRequestDto;
 import com.milosz000.dto.RegisterRequestDto;
 import com.milosz000.exception.ApiRequestException;
+import com.milosz000.exception.ExpiredTokenException;
+import com.milosz000.exception.InvalidTokenException;
 import com.milosz000.model.ConfirmationToken;
 import com.milosz000.model.PasswordResetToken;
 import com.milosz000.model.User;
@@ -18,6 +21,8 @@ import com.milosz000.service.EmailService;
 import com.milosz000.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,6 +53,8 @@ public class UserServiceImpl implements UserService {
     private final ResetPasswordTokenRepository resetPasswordTokenRepository;
 
     private final EmailService emailService;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Value(value = "${TOKEN_EXP_TIME}")
     private int TOKEN_EXP_TIME;
@@ -181,5 +188,32 @@ public class UserServiceImpl implements UserService {
         emailService.sendResetPasswordEmail(user.getEmail(), user.getFirstName(), token);
 
         resetPasswordTokenRepository.save(passwordResetToken);
+    }
+
+    @Transactional
+    @Override
+    public String changePassword(String resetPasswordToken, NewPasswordRequestDto newPasswordDto) {
+        String hashedToken = Hashing.sha256().hashString(resetPasswordToken, StandardCharsets.UTF_8).toString();
+
+        PasswordResetToken token = resetPasswordTokenRepository.findByToken(hashedToken)
+                .orElseThrow(() -> new InvalidTokenException("Invalid Reset Password Token"));
+
+        // check if token is expired
+
+        if(token.getExpiresAt().isBefore(LocalDateTime.now())) throw new ExpiredTokenException("Token is expired!");
+
+        LOGGER.info("token: " + token);
+
+        User user = token.getUser();
+
+        LOGGER.info("user: " + user);
+
+        user.setPassword(passwordEncoder.encode(newPasswordDto.getPassword()));
+        userRepository.save(user);
+
+        // delete all password reset tokens for user
+        resetPasswordTokenRepository.deleteAllByUserId(user.getId());
+
+        return "password changed";
     }
 }
