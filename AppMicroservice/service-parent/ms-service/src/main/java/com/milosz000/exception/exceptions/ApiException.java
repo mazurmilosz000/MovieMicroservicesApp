@@ -1,4 +1,4 @@
-package com.milosz000.exception;
+package com.milosz000.exception.exceptions;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,9 +1,6 @@
 package com.milosz000.controller;
 
-import com.milosz000.dto.AuthenticationRequestDto;
-import com.milosz000.dto.AuthenticationResponseDto;
-import com.milosz000.dto.EmailDto;
-import com.milosz000.dto.RegisterRequestDto;
+import com.milosz000.dto.*;
 import com.milosz000.service.ConfirmationTokenService;
 import com.milosz000.service.UserService;
 import jakarta.validation.Valid;
@@ -22,6 +19,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
 
         // return status code 200 and token
+        // TODO: change it (I dont want to return token, bcs account is not enabled)
         return ResponseEntity.ok(userService.register(registerRequestDto));
     }
 
@@ -49,6 +47,12 @@ public class AuthenticationController {
             That way I don't give attackers any indication that they should try a different email address.
          */
         return "email has been sent successfully";
+    }
+
+    @PostMapping("/new-password")
+    public String resetPasswordCredentials(@RequestParam String token,
+                                           @Valid @RequestBody NewPasswordRequestDto newPasswordDto) {
+        return userService.changePassword(token, newPasswordDto);
     }
 
 }

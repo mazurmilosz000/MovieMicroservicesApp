@@ -1,9 +1,6 @@
 package com.milosz000.service;
 
-import com.milosz000.dto.AuthenticationRequestDto;
-import com.milosz000.dto.AuthenticationResponseDto;
-import com.milosz000.dto.EmailDto;
-import com.milosz000.dto.RegisterRequestDto;
+import com.milosz000.dto.*;
 
 public interface UserService {
     AuthenticationResponseDto register(RegisterRequestDto registerRequestDto);
@@ -15,4 +12,6 @@ public interface UserService {
     String confirmAccount(String token);
 
     void sendResetPasswordLink(String email);
+
+    String changePassword(String resetPasswordToken, NewPasswordRequestDto newPasswordDto);
 }
