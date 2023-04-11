@@ -3,8 +3,10 @@ package com.milosz000.exception;
 import com.milosz000.exception.exceptions.ApiException;
 import com.milosz000.exception.exceptions.ResetPasswordInvalidTokenException;
 import com.milosz000.exception.exceptions.TokenExpiredException;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -12,8 +14,6 @@ import java.time.ZonedDateTime;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
-
-    //TODO: avoid boilerplate code (https://github.com/spring-projects/spring-framework/blob/main/spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/ResponseEntityExceptionHandler.java)
 
     @ExceptionHandler(value = {ApiRequestException.class})
     public ResponseEntity<Object> handleApiRequestException(ApiRequestException e) {
@@ -56,5 +56,15 @@ public class ApiExceptionHandler {
         );
 
         return new ResponseEntity<>(exception, badRequest);
+    }
+
+    @ExceptionHandler(value = UsernameNotFoundException.class)
+    public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException e) {
+
+        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+
+        UsernameNotFoundException exception = new UsernameNotFoundException(e.getMessage());
+
+        return new ResponseEntity<>(exception.getMessage(), badRequest);
     }
 }
