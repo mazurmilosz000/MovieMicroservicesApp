@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface ValidConfirmedField {
 
-    String message() default "Doesn't match the original";
+    String message() default "Password doesn't match the original";
 
     String originalField();
 
