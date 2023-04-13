@@ -16,11 +16,10 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
 
-        // return status code 200 and token
-        // TODO: change it (I dont want to return token, bcs account is not enabled)
-        return ResponseEntity.ok(userService.register(registerRequestDto));
+        userService.register(registerRequestDto);
+        return ResponseEntity.ok("Account created! Now check your email");
     }
 
     @PostMapping("/login")

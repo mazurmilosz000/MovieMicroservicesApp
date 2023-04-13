@@ -81,10 +81,6 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-//        String token = jwtService.generateToken(user);
-//
-//        return AuthenticationResponseDto.builder().token(token).build();
-
         // generate authentication token
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken = new ConfirmationToken(
@@ -123,8 +119,11 @@ public class UserServiceImpl implements UserService {
 
 
         var token = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+
         return AuthenticationResponseDto.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .build();
     }
 
