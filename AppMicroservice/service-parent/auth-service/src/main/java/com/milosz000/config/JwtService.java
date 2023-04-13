@@ -21,7 +21,9 @@ public class JwtService {
     @Value(value = "${SECRET_KEY}")
     private String SECRET_KEY;
 
-    private final int JWT_EXP_TIME = 5 * 60 * 60;
+    private final int JWT_EXP_TIME = 10 * 60 * 1000;
+
+    private final int REFRESH_TOKEN_EXP_TIME = 30 * 60 * 1000;
 
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -36,10 +38,19 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * JWT_EXP_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_EXP_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
 
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // method to generate token without extra claims
