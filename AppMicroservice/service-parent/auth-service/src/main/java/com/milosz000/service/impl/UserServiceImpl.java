@@ -1,7 +1,9 @@
 package com.milosz000.service.impl;
 
 import com.google.common.hash.Hashing;
+import com.milosz000.amqp.AMQPConfirmationEmail;
 import com.milosz000.config.JwtService;
+import com.milosz000.config.MQConfig;
 import com.milosz000.dto.AuthenticationRequestDto;
 import com.milosz000.dto.AuthenticationResponseDto;
 import com.milosz000.dto.NewPasswordRequestDto;
@@ -21,8 +23,9 @@ import com.milosz000.service.EmailService;
 import com.milosz000.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,7 +38,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -54,7 +57,7 @@ public class UserServiceImpl implements UserService {
 
     private final EmailService emailService;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(EmailServiceImpl.class);
+    private final RabbitTemplate rabbitTemplate;
 
     @Value(value = "${TOKEN_EXP_TIME}")
     private int TOKEN_EXP_TIME;
@@ -93,7 +96,8 @@ public class UserServiceImpl implements UserService {
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         // send confirmation email
-        emailService.sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
+//        emailService.sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
+        sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
 
         return AuthenticationResponseDto.builder()
                 .token(token)
@@ -201,11 +205,11 @@ public class UserServiceImpl implements UserService {
 
         if(token.getExpiresAt().isBefore(LocalDateTime.now())) throw new ExpiredTokenException("Token is expired!");
 
-        LOGGER.info("token: " + token);
+        log.info("token: " + token);
 
         User user = token.getUser();
 
-        LOGGER.info("user: " + user);
+        log.info("user: " + user);
 
         user.setPassword(passwordEncoder.encode(newPasswordDto.getPassword()));
         userRepository.save(user);
@@ -214,5 +218,26 @@ public class UserServiceImpl implements UserService {
         resetPasswordTokenRepository.deleteAllByUserId(user.getId());
 
         return "password changed";
+    }
+
+    private void sendConfirmationEmail(String emailTo, String userName, String confirmationToken) {
+
+        AMQPConfirmationEmail confirmationEmail = new AMQPConfirmationEmail();
+        confirmationEmail.setEmailTo(emailTo);
+        confirmationEmail.setName(userName);
+        confirmationEmail.setConfirmationToken(confirmationToken);
+
+        try {
+            rabbitTemplate.convertAndSend(
+                    MQConfig.CONFIRMATION_TOKEN_EXCHANGE,
+                    MQConfig.CONFIRMATION_TOKEN_ROUTING_KEY,
+                    confirmationEmail
+            );
+            log.info("Email to {} has been successfully sent", emailTo);
+
+        } catch (AmqpException e) {
+            log.warn("Failed to send confirmation email to {}", emailTo);
+            throw new RuntimeException("There was an error while trying to sent confirmation email");
+        }
     }
 }
