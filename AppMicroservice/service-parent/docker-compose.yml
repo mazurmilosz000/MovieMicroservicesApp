@@ -29,6 +29,16 @@ services:
     volumes:
       - auth_db:/var/lib/postgresql/data
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+#    environment:
+#      - RABBITMQ_DEFAULT_USER=admin
+#      - RABBITMQ_DEFAULT_PASS=admin
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # HTTP management UI
+
 volumes:
   db:
   auth_db:
