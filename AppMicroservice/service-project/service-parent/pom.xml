@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.milosz000</groupId>
+    <artifactId>service-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>movie-service</module>
+        <module>ms-service</module>
+        <module>auth-service</module>
+        <module>cs-service</module>
+        <module>eureka-server</module>
+        <module>api-gateway</module>
+        <module>notification-service</module>
+    </modules>
+
+
+    <properties>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.boot.maven.plugin.version>3.0.4</spring.boot.maven.plugin.version>
+        <spring.boot.dependencies.version>3.0.4</spring.boot.dependencies.version>
+        <spring.boot.starter.web.version>3.0.4</spring.boot.starter.web.version>
+        <spring.boot.starter.data.jpa.version>3.0.4</spring.boot.starter.data.jpa.version>
+        <spring.boot.starter.security.version>3.0.4</spring.boot.starter.security.version>
+        <spring.security.test.version>6.0.2</spring.security.test.version>
+        <spring.cloud.starter.config.version>4.0.1</spring.cloud.starter.config.version>
+        <spring.cloud.starter.netflix.eureka.client.version>4.0.1</spring.cloud.starter.netflix.eureka.client.version>
+        <psql.version>42.5.4</psql.version>
+        <testcontainers.version>1.17.6</testcontainers.version>
+        <!-- services versions: -->
+        <ms.version>1.0-SNAPSHOT</ms.version>
+        <notification.service.version>1.0-SNAPSHOT</notification.service.version>
+        <service-commons.version>0.0.1-SNAPSHOT</service-commons.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.dependencies.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.maven.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

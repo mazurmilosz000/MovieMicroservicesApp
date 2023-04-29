@@ -1,0 +1,12 @@
+server:
+  port: 8082
+
+spring:
+  cloud:
+    config:
+      username: admin
+      password: secret
+  application:
+    name: movie_service
+  config:
+    import: optional:http://localhost:8888/
