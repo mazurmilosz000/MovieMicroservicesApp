@@ -1,0 +1,26 @@
+server:
+  port: 8083
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: api_gateway_service
+  cloud:
+    gateway:
+      routes:
+        - id: movie-service
+          uri: ${MOVIE_SERVICE_URL:http://localhost:8082}
+          #uri: lb://MOVIE_SERVICE
+          predicates:
+            - Path=/api/**
+
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          # TODO: figure it out, why it does not work
+          #uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**

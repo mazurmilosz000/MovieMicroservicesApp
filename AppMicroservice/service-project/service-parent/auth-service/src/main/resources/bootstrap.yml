@@ -1,0 +1,19 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    config:
+      username: admin
+      password: secret
+  application:
+    name: auth-service
+  config:
+    import: optional:http://localhost:8888/
+  rabbitmq:
+    addresses: localhost:5672
+
+TOKEN_EXP_TIME: 15
+
+
+
