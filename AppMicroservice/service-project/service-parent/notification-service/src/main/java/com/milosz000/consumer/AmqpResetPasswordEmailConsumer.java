@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class AmqpConfirmationEmailConsumer {
+public class AmqpResetPasswordEmailConsumer {
 
     private final EmailService emailService;
 
-    @RabbitListener(queues = Naming.AMQP.CONFIRMATION_TOKEN_QUEUE)
+    @RabbitListener(queues = Naming.AMQP.RESET_PASSWORD_TOKEN_QUEUE)
     public void receiveMessage(final AMQPTokenEmail message) {
         log.info("Sending confirmation email to: " + message.getEmailTo());
-        emailService.sendConfirmationEmail(message.getEmailTo(), message.getName(), message.getConfirmationToken());
+        emailService.sendResetPasswordEmail(message.getEmailTo(), message.getName(), message.getConfirmationToken());
 
     }
 }

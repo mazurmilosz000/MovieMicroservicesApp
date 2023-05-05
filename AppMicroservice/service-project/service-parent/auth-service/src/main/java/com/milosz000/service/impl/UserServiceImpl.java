@@ -1,7 +1,7 @@
 package com.milosz000.service.impl;
 
 import com.google.common.hash.Hashing;
-import com.milosz000.amqp.AMQPConfirmationEmail;
+import com.milosz000.amqp.AMQPTokenEmail;
 import com.milosz000.config.JwtService;
 import com.milosz000.constants.Naming;
 import com.milosz000.dto.AuthenticationRequestDto;
@@ -19,7 +19,6 @@ import com.milosz000.repository.ConfirmationTokenRepository;
 import com.milosz000.repository.ResetPasswordTokenRepository;
 import com.milosz000.repository.UserRepository;
 import com.milosz000.service.ConfirmationTokenService;
-import com.milosz000.service.EmailService;
 import com.milosz000.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -55,13 +54,12 @@ public class UserServiceImpl implements UserService {
 
     private final ResetPasswordTokenRepository resetPasswordTokenRepository;
 
-    private final EmailService emailService;
-
     private final RabbitTemplate rabbitTemplate;
 
     @Value(value = "${TOKEN_EXP_TIME}")
     private int TOKEN_EXP_TIME;
 
+    @Transactional
     @Override
     public AuthenticationResponseDto register(RegisterRequestDto registerRequestDto) {
         Optional<User> optionalEmail = userRepository.findByEmail(registerRequestDto.getEmail());
@@ -93,11 +91,16 @@ public class UserServiceImpl implements UserService {
                 user
         );
 
+        // send confirmation email
+        sendEmail(
+                registerRequestDto.getEmail(),
+                registerRequestDto.getFirstname(),
+                token,
+                Naming.AMQP.TOKEN_EXCHANGE,
+                Naming.AMQP.CONFIRMATION_TOKEN_ROUTING_KEY
+                );
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
-        // send confirmation email
-//        emailService.sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
-        sendConfirmationEmail(registerRequestDto.getEmail(), registerRequestDto.getFirstname(), token);
 
         return AuthenticationResponseDto.builder()
                 .token(token)
@@ -188,7 +191,13 @@ public class UserServiceImpl implements UserService {
         );
 
         // send email with reset password link
-        emailService.sendResetPasswordEmail(user.getEmail(), user.getFirstName(), token);
+        sendEmail(
+                user.getEmail(),
+                user.getFirstName(),
+                token,
+                Naming.AMQP.TOKEN_EXCHANGE,
+                Naming.AMQP.RESET_PASSWORD_TOKEN_ROUTING_KEY
+        );
 
         resetPasswordTokenRepository.save(passwordResetToken);
     }
@@ -220,17 +229,23 @@ public class UserServiceImpl implements UserService {
         return "password changed";
     }
 
-    private void sendConfirmationEmail(String emailTo, String userName, String confirmationToken) {
+    private void sendEmail(
+            String emailTo,
+            String userName,
+            String confirmationToken,
+            String exchange,
+            String routingKey
+    ) {
 
-        AMQPConfirmationEmail confirmationEmail = new AMQPConfirmationEmail();
+        AMQPTokenEmail confirmationEmail = new AMQPTokenEmail();
         confirmationEmail.setEmailTo(emailTo);
         confirmationEmail.setName(userName);
         confirmationEmail.setConfirmationToken(confirmationToken);
 
         try {
             rabbitTemplate.convertAndSend(
-                    Naming.AMQP.CONFIRMATION_TOKEN_EXCHANGE,
-                    Naming.AMQP.CONFIRMATION_TOKEN_ROUTING_KEY,
+                    exchange,
+                    routingKey,
                     confirmationEmail
             );
             log.info("Email to {} has been successfully sent", emailTo);

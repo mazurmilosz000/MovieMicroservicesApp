@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AMQPConfirmationEmail {
+public class AMQPTokenEmail {
 
     String emailTo;
     String name;
