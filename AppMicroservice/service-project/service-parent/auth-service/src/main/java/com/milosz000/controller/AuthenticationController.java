@@ -1,8 +1,9 @@
 package com.milosz000.controller;
 
 import com.milosz000.dto.*;
-import com.milosz000.service.ConfirmationTokenService;
 import com.milosz000.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,20 @@ public class AuthenticationController {
 
     private final UserService userService;
 
+    @Operation(
+            description = "Endpoint for create new user",
+            summary = "Register user endpoint",
+            responses = {
+                    @ApiResponse(
+                            description = "Account created",
+                            responseCode = "200"
+                    ),
+                    @ApiResponse(
+                            description = "Bad credentials",
+                            responseCode = "400"
+                    )
+            }
+    )
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto registerRequestDto){
 

@@ -33,6 +33,7 @@
         <spring.cloud.starter.netflix.eureka.client.version>4.0.1</spring.cloud.starter.netflix.eureka.client.version>
         <psql.version>42.5.4</psql.version>
         <testcontainers.version>1.17.6</testcontainers.version>
+        <springdoc.openapi.starter.version>2.1.0</springdoc.openapi.starter.version>
         <!-- services versions: -->
         <ms.version>1.0-SNAPSHOT</ms.version>
         <notification.service.version>1.0-SNAPSHOT</notification.service.version>
