@@ -10,4 +10,9 @@ public class Naming {
         public static final String RESET_PASSWORD_TOKEN_ROUTING_KEY = "reset_password_token_routingKey";
 
     }
+
+    public enum Role {
+        ADMIN,
+        USER
+    }
 }

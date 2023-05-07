@@ -1,6 +1,6 @@
 package com.milosz000.model;
 
-import com.milosz000.model.enums.Role;
+import com.milosz000.constants.Naming;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -47,7 +47,7 @@ public class User implements UserDetails {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Naming.Role role;
 
     private boolean isEnabled;
 
