@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
 
             if (jwtService.validateToken(refreshToken, userDetails)){
                 // generate new Access Token
-                var accessToken = jwtService.generateRefreshToken(userDetails);
+                var accessToken = jwtService.generateToken(userDetails);
                 var authResponse = AuthenticationResponseDto.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
