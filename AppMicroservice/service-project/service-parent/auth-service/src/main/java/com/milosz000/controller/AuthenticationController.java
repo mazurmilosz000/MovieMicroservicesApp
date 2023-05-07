@@ -4,10 +4,14 @@ import com.milosz000.dto.*;
 import com.milosz000.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,6 +71,14 @@ public class AuthenticationController {
     public String resetPasswordCredentials(@RequestParam String token,
                                            @Valid @RequestBody NewPasswordRequestDto newPasswordDto) {
         return userService.changePassword(token, newPasswordDto);
+    }
+
+    @PostMapping("/refresh-token")
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        userService.refreshToken(request, response);
     }
 
 }

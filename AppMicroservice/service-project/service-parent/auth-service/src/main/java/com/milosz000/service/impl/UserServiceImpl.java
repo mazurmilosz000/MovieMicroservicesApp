@@ -1,5 +1,6 @@
 package com.milosz000.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
 import com.milosz000.amqp.AMQPTokenEmail;
 import com.milosz000.config.JwtService;
@@ -14,24 +15,28 @@ import com.milosz000.exception.InvalidTokenException;
 import com.milosz000.model.ConfirmationToken;
 import com.milosz000.model.PasswordResetToken;
 import com.milosz000.model.User;
-import com.milosz000.model.enums.Role;
 import com.milosz000.repository.ConfirmationTokenRepository;
 import com.milosz000.repository.ResetPasswordTokenRepository;
 import com.milosz000.repository.UserRepository;
 import com.milosz000.service.ConfirmationTokenService;
 import com.milosz000.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -77,7 +82,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(registerRequestDto.getLastname())
                 .password(passwordEncoder.encode(registerRequestDto.getPassword()))
                 .isEnabled(false)
-                .role(Role.USER)
+                .role(Naming.Role.USER)
                 .build();
 
         userRepository.save(user);
@@ -96,14 +101,13 @@ public class UserServiceImpl implements UserService {
                 registerRequestDto.getEmail(),
                 registerRequestDto.getFirstname(),
                 token,
-                Naming.AMQP.TOKEN_EXCHANGE,
                 Naming.AMQP.CONFIRMATION_TOKEN_ROUTING_KEY
                 );
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
 
         return AuthenticationResponseDto.builder()
-                .token(token)
+                .accessToken(token)
                 .build();
 
 
@@ -129,7 +133,7 @@ public class UserServiceImpl implements UserService {
         var refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponseDto.builder()
-                .token(token)
+                .accessToken(token)
                 .refreshToken(refreshToken)
                 .build();
     }
@@ -195,7 +199,6 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getFirstName(),
                 token,
-                Naming.AMQP.TOKEN_EXCHANGE,
                 Naming.AMQP.RESET_PASSWORD_TOKEN_ROUTING_KEY
         );
 
@@ -229,11 +232,42 @@ public class UserServiceImpl implements UserService {
         return "password changed";
     }
 
+    @Override
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // check if token exists
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String username;
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+
+        // exclude "Bearer"
+        refreshToken = authHeader.substring(7);
+        username = jwtService.getUsernameFromToken(refreshToken);
+
+        // check if username is not null and if user is not authenticated
+        if (username != null) {
+            UserDetails userDetails = this.userRepository.findByUsername(username).orElseThrow();
+
+            if (jwtService.validateToken(refreshToken, userDetails)){
+                // generate new Access Token
+                var accessToken = jwtService.generateRefreshToken(userDetails);
+                var authResponse = AuthenticationResponseDto.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+            }
+
+        }
+    }
+
     private void sendEmail(
             String emailTo,
             String userName,
             String confirmationToken,
-            String exchange,
             String routingKey
     ) {
 
@@ -244,7 +278,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             rabbitTemplate.convertAndSend(
-                    exchange,
+                    Naming.AMQP.TOKEN_EXCHANGE,
                     routingKey,
                     confirmationEmail
             );

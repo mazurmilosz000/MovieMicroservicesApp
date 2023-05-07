@@ -45,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
         token = authHeader.substring(7);
         username = jwtService.getUsernameFromToken(token);
 
-        // check if email is not null and if user is not authenticated
+        // check if username is not null and if user is not authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.getUserByUsername(username);
 
