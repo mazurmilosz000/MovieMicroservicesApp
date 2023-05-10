@@ -6,6 +6,7 @@ import com.milosz000.model.Director;
 import com.milosz000.service.DirectorService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +24,8 @@ public class DirectorController {
     }
 
     @PostMapping
-    public String addDirector(@Valid @RequestBody DirectorDto directorDto) {
-        directorService.addDirector(directorDto);
-
-        return "Director added successfully!";
+    public ResponseEntity<String> addDirector(@Valid @RequestBody DirectorDto directorDto) {
+       return directorService.addDirector(directorDto);
     }
 
     @GetMapping
