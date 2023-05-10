@@ -2,26 +2,28 @@ package com.milosz000.service.impl;
 
 
 import com.milosz000.dto.MovieDto;
+import com.milosz000.mapper.MovieMapper;
 import com.milosz000.model.Movie;
 import com.milosz000.repository.MovieRepository;
 import com.milosz000.service.MovieService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class MovieServiceImpl implements MovieService {
 
     private final MovieRepository movieRepository;
 
-    public MovieServiceImpl(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
-    }
+    private final MovieMapper movieMapper;
+
 
     @Override
     public void addMovie(MovieDto movieRequest) {
-        Movie movie = mapDtoToMovie(movieRequest);
+        Movie movie = movieMapper.dtoToModel(movieRequest);
         movieRepository.save(movie);
     }
 
@@ -31,27 +33,4 @@ public class MovieServiceImpl implements MovieService {
 
     }
 
-
-    // method that convert Movie to movieDto
-    private MovieDto mapMovieToDto(Movie movie) {
-
-        return MovieDto.builder()
-                .name(movie.getName())
-                .director(movie.getDirector())
-                .genre(movie.getGenre())
-                .description(movie.getDescription())
-                .build();
-    }
-
-    // method that convert movieDto to Movie
-    private Movie mapDtoToMovie(MovieDto movieDto) {
-
-        return Movie.builder()
-                .name(movieDto.getName())
-                .director(movieDto.getDirector())
-                .genre(movieDto.getGenre())
-                .description(movieDto.getDescription())
-                .release(movieDto.getRelease())
-                .build();
-    }
 }
